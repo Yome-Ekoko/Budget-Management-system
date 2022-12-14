@@ -19,6 +19,6 @@ public class UpdatePasswordController {
     @PostMapping("/update-password")
     public ResponseEntity<String> updatePassword(@Valid @RequestBody PasswordUpdateRequest passwordUpdateRequest){
         this.passwordUpdateService.updatePassword(passwordUpdateRequest);
-        return new ResponseEntity<>("password updated successfully!", HttpStatus.OK);
+        return ResponseEntity.ok("password updated successfully!");
     }
 }

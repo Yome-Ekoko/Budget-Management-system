@@ -17,7 +17,6 @@ import java.util.Optional;
 @AllArgsConstructor
 @Service
 public class PasswordUpdateServiceImpl  implements PasswordUpdateService {
-    private final JwtUtils jwtUtils;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserUtil userUtil;
@@ -36,11 +35,11 @@ public class PasswordUpdateServiceImpl  implements PasswordUpdateService {
         if(optionalUser.isPresent()){
             User user = optionalUser.get();
             String encodedPassword = user.getPassword();
-            Boolean matches = passwordEncoder.matches(password, encodedPassword);
+            boolean matches = passwordEncoder.matches(password, encodedPassword);
 
             if(!matches) throw new WrongPasswordException(HttpStatus.BAD_REQUEST, "incorrect password" );
 
-            Boolean equals = newPassword.equals(confirmPassword);
+            boolean equals = newPassword.equals(confirmPassword);
             if(!equals) throw new WrongPasswordException(HttpStatus.BAD_REQUEST, "new password does not match");
 
             user.setPassword(passwordEncoder.encode(newPassword));

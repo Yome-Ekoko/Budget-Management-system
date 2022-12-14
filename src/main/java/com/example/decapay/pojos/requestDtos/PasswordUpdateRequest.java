@@ -8,7 +8,6 @@ import javax.validation.constraints.NotBlank;
 @Data
 @AllArgsConstructor
 public class PasswordUpdateRequest {
-
     @NotBlank(message = "password is mandatory")
     private String password;
 
@@ -17,6 +16,5 @@ public class PasswordUpdateRequest {
 
     @NotBlank(message = "password is mandatory")
     private String confirmPassword;
-
 
 }

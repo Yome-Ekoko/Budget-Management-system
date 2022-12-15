@@ -1,13 +1,11 @@
 package com.example.decapay.services.impl;
 
-import com.example.decapay.configurations.security.JwtUtils;
 import com.example.decapay.exceptions.WrongPasswordException;
 import com.example.decapay.models.User;
 import com.example.decapay.pojos.requestDtos.PasswordUpdateRequest;
 import com.example.decapay.repositories.UserRepository;
 import com.example.decapay.services.PasswordUpdateService;
 import com.example.decapay.utils.UserUtil;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;

@@ -35,12 +35,12 @@ public class PasswordUpdateServiceImpl  implements PasswordUpdateService {
         if(optionalUser.isPresent()){
             User user = optionalUser.get();
             String encodedPassword = user.getPassword();
-            boolean matches = passwordEncoder.matches(password, encodedPassword);
+            boolean isPasswordAMatch = passwordEncoder.matches(password, encodedPassword);
 
-            if(!matches) throw new WrongPasswordException(HttpStatus.BAD_REQUEST, "incorrect password" );
+            if(!isPasswordAMatch) throw new WrongPasswordException(HttpStatus.BAD_REQUEST, "incorrect password" );
 
-            boolean equals = newPassword.equals(confirmPassword);
-            if(!equals) throw new WrongPasswordException(HttpStatus.BAD_REQUEST, "new password does not match");
+            boolean isPasswordEqual = newPassword.equals(confirmPassword);
+            if(!isPasswordEqual) throw new WrongPasswordException(HttpStatus.BAD_REQUEST, "new password does not match");
 
             user.setPassword(passwordEncoder.encode(newPassword));
 

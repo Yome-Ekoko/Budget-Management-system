@@ -105,7 +105,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public String forgotPasswordRequest(ForgetPasswordRequest forgotPasswordRequest) {
         String email = forgotPasswordRequest.getEmail();
-        System.out.println(forgotPasswordUrl);
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 

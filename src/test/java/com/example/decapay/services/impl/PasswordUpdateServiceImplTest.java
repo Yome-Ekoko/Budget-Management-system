@@ -33,10 +33,10 @@ class PasswordUpdateServiceImplTest {
     @Mock
     private UserUtil userUtil;
 
-    @BeforeEach
-    void setUp() {
-        passwordUpdateService = new PasswordUpdateServiceImpl(jwtUtils, userRepository, passwordEncoder, userUtil);
-    }
+//    @BeforeEach
+//    void setUp() {
+//        passwordUpdateService = new PasswordUpdateServiceImpl(jwtUtils, userRepository, passwordEncoder, userUtil);
+//    }
 
     @Test
     void createPassword() {

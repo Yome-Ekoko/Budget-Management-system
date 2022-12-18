@@ -21,7 +21,8 @@ public class BudgetCategoryServiceImpl implements BudgetCategoryService {
     public void deleteBudgetCategory(Long budgetCategoryId) throws UserNotFoundException {
 
         User user = userRepository.findByEmail(userUtil.getAuthenticatedUserEmail())
-                .orElseThrow(() -> new UserNotFoundException("specified user not found in the database"));
+                .orElseThrow(() -> new UserNotFoundException(HttpStatus.BAD_REQUEST,
+                        "specified user not found in the database"));
 
         BudgetCategory budgetCategory = budgetCategoryRepository.findById(budgetCategoryId)
                 .orElseThrow(() -> new ResourceNotFoundException(

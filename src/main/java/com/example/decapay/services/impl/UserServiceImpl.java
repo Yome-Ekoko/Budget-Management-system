@@ -6,15 +6,19 @@ import com.example.decapay.configurations.security.JwtUtils;
 import com.example.decapay.enums.Status;
 import com.example.decapay.enums.VerificationType;
 import com.example.decapay.exceptions.ResourceNotFoundException;
+import com.example.decapay.exceptions.UserAlreadyExistException;
+import com.example.decapay.exceptions.ValidationException;
 import com.example.decapay.models.Token;
-import com.example.decapay.configurations.security.CustomUserDetailService;
-import com.example.decapay.configurations.security.JwtUtils;
 
-import com.example.decapay.pojos.requestDtos.LoginRequestDto;
+import com.example.decapay.pojos.requestDtos.*;
 
+import com.example.decapay.pojos.responseDtos.UserResponseDto;
 import com.example.decapay.repositories.TokenRepository;
 import com.example.decapay.services.UserService;
-import com.example.decapay.utils.PasswordUtils;
+import com.example.decapay.utils.MailSenderUtil;
+import com.example.decapay.utils.UserIdUtil;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -28,21 +32,20 @@ import org.springframework.stereotype.Service;
 
 
 import com.example.decapay.models.User;
-import com.example.decapay.pojos.requestDtos.ForgetPasswordRequest;
-import com.example.decapay.pojos.requestDtos.ResetPasswordRequest;
-import com.example.decapay.pojos.requestDtos.UserUpdateRequest;
 import com.example.decapay.repositories.UserRepository;
 
 import com.example.decapay.utils.UserUtil;
 
 
+import javax.mail.MessagingException;
 import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 import java.util.InputMismatchException;
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-    @Value("${forgot.password.url:http://localhost:5432/reset-password/}")
+    @Value("${forgot.password.url:http://localhost:5432/Api/v1/auth/verify-token/}")
     private String forgotPasswordUrl;
 
     private final UserRepository userRepository;
@@ -50,6 +53,10 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final EmailSenderService emailSenderService;
     private final TokenRepository tokenRepository;
+
+    private final MailSenderUtil mailSenderUtil;
+
+    private final UserIdUtil idUtil;
 
 
     @Autowired
@@ -59,12 +66,42 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private JwtUtils jwtUtils;
 
-    public UserServiceImpl(UserRepository userRepository, UserUtil userUtil,PasswordEncoder passwordEncoder,TokenRepository tokenRepository,EmailSenderService emailSenderService) {
-        this.userRepository = userRepository;
-        this.userUtil = userUtil;
-        this.passwordEncoder=passwordEncoder;
-        this.tokenRepository=tokenRepository;
-        this.emailSenderService=emailSenderService;
+
+    @Override
+    public UserResponseDto createUser(UserRequestDto request) throws  MessagingException {
+
+        if(userRepository.findByEmail(request.getEmail()).isPresent())
+            throw new UserAlreadyExistException("User already exist");
+
+        boolean matches = request.getPassword().equals(request.getConfirmPassword());
+
+        if(!matches) throw new ValidationException("password and confirm password do not match.");
+
+        User newUser = new User();
+
+        BeanUtils.copyProperties(request,newUser);
+
+        String publicUserId = idUtil.generatedUserId(20);
+        newUser.setUserId(publicUserId);
+
+        newUser.setPassword(passwordEncoder.encode(request.getPassword()));
+
+
+
+
+
+        User savedUser = userRepository.save(newUser);
+
+        mailSenderUtil.verifyMail(savedUser);
+
+        UserResponseDto responseDto = new UserResponseDto();
+
+        BeanUtils.copyProperties(savedUser,responseDto);
+
+
+
+        return responseDto;
+
     }
 
     @Override
@@ -72,7 +109,6 @@ public class UserServiceImpl implements UserService {
          authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(loginRequestDto.getEmail(), loginRequestDto.getPassword()));
         final UserDetails user = customUserDetailService.loadUserByUsername(loginRequestDto.getEmail());
-
         if (user != null)
             return ResponseEntity.ok(jwtUtils.generateToken(user));
 
@@ -124,28 +160,41 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String resetPassword(ResetPasswordRequest request, String token) {
+    public String resetPassword(ResetPasswordRequest request) {
         if (!request.getNewPassword().equals(request.getConfirmPassword()))
             throw new InputMismatchException("Passwords do not match");
 
-        String email = jwtUtils.extractUsername(token);
 
-        User user = userRepository.findByEmail(email)
+
+        User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        Token tokenEntity = tokenRepository.findByToken(token)
-                .orElseThrow(() -> new ResourceNotFoundException(HttpStatus.NOT_FOUND, "Token does not exist."));
-
-        if (tokenEntity.getStatus().equals(Status.EXPIRED))
-            throw new ResourceNotFoundException(HttpStatus.BAD_REQUEST, "Token expired.");
+//        Token tokenEntity = tokenRepository.findByToken(token)
+//                .orElseThrow(() -> new ResourceNotFoundException(HttpStatus.NOT_FOUND, "Token does not exist."));
+//
+//        if (tokenEntity.getStatus().equals(Status.EXPIRED))
+//            throw new ResourceNotFoundException(HttpStatus.BAD_REQUEST, "Token expired.");
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
 
-        tokenEntity.setStatus(Status.EXPIRED);
-        tokenRepository.save(tokenEntity);
+        //todo: to be removed
+
+//        tokenEntity.setStatus(Status.EXPIRED);
+//        tokenRepository.save(tokenEntity);
 
         return "Password reset successful";
+    }
+
+    @Override
+    public String verifyToken(String token) {
+
+          tokenRepository.findByToken(token)
+                .orElseThrow(() -> new RuntimeException("token does not exist"));
+          //todo: update user verification status
+
+
+        return "token exist";
     }
 
 

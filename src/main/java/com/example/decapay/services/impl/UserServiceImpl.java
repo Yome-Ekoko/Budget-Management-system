@@ -193,6 +193,11 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new RuntimeException("token does not exist"));
           //todo: update user verification status
 
+        Token token1 = new Token();
+        if(!token1.getToken().equals(token)) {
+            throw new ValidationException("token does not match");
+        }
+
 
         return "token exist";
     }

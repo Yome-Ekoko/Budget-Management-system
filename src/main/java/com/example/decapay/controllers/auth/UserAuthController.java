@@ -25,11 +25,11 @@ public class UserAuthController {
 
         UserResponseDto returnValue = userService.createUser(requestDto);
 
-        return new ResponseEntity<>(returnValue, HttpStatus.CREATED);
+        return new ResponseEntity<>(returnValue, HttpStatus.OK);
     }
 
     @GetMapping("/verify-token/{token}")
-    public ResponseEntity<?> verifyToken( @PathVariable("token") String token) {
+    public ResponseEntity<String> verifyToken( @PathVariable("token") String token) {
         return new ResponseEntity<>(userService.verifyToken(token),HttpStatus.FOUND);
     }
 

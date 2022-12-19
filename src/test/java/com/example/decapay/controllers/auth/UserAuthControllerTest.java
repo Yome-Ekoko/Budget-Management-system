@@ -3,7 +3,9 @@ package com.example.decapay.controllers.auth;
 import com.example.decapay.configurations.security.CustomUserDetailService;
 import com.example.decapay.configurations.security.JwtAuthFilter;
 import com.example.decapay.pojos.requestDtos.LoginRequestDto;
+import com.example.decapay.pojos.requestDtos.UserRequestDto;
 import com.example.decapay.services.impl.UserServiceImpl;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,11 +19,14 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = UserAuthControllerTest.class)
 class UserAuthControllerTest {
+
+
     private MockMvc mockMvc;
 
     @MockBean
@@ -59,6 +64,23 @@ class UserAuthControllerTest {
         }catch(Exception e){
             e.printStackTrace();
         }
+    }
+    @WithMockUser("fab")
+    @Test
+    void createUser() throws Exception {
+        UserRequestDto userRequestDto = new UserRequestDto();
+        userRequestDto.setFirstName("drake");
+        userRequestDto.setLastName("james");
+        userRequestDto.setEmail("james@gmail.com");
+        userRequestDto.setPhoneNumber("0901234567");
+        userRequestDto.setPassword("1234");
+        userRequestDto.setConfirmPassword("1234");
+
+        String contents = objectMapper.writeValueAsString(userRequestDto);
+        mockMvc.perform(post("/api/v1/auth/register")
+                .contentType(MediaType.APPLICATION_JSON).with(csrf())
+                .content(contents))
+                .andExpect(status().isOk());
     }
 
 }

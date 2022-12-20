@@ -164,26 +164,10 @@ public class UserServiceImpl implements UserService {
     public String resetPassword(ResetPasswordRequest request) {
         if (!request.getNewPassword().equals(request.getConfirmPassword()))
             throw new InputMismatchException("Passwords do not match");
-
-
-
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
-//        Token tokenEntity = tokenRepository.findByToken(token)
-//                .orElseThrow(() -> new ResourceNotFoundException(HttpStatus.NOT_FOUND, "Token does not exist."));
-//
-//        if (tokenEntity.getStatus().equals(Status.EXPIRED))
-//            throw new ResourceNotFoundException(HttpStatus.BAD_REQUEST, "Token expired.");
-
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
-
-        //todo: to be removed
-
-//        tokenEntity.setStatus(Status.EXPIRED);
-//        tokenRepository.save(tokenEntity);
-
         return "Password reset successful";
     }
 

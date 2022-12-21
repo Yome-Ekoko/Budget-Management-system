@@ -5,6 +5,7 @@ import com.example.decapay.configurations.security.CustomUserDetailService;
 import com.example.decapay.configurations.security.JwtUtils;
 import com.example.decapay.exceptions.AuthenticationException;
 import com.example.decapay.models.User;
+import com.example.decapay.pojos.mailDto.MailDto;
 import com.example.decapay.pojos.requestDtos.ForgetPasswordRequest;
 import com.example.decapay.pojos.requestDtos.LoginRequestDto;
 import com.example.decapay.repositories.UserRepository;
@@ -34,10 +35,6 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
-@SpringBootTest
-@SpringBootTest
-@ExtendWith(SpringExtension.class)
-
 public class UserServiceImplTest {
     @Mock
     private EmailSenderService emailSenderService;
@@ -59,7 +56,7 @@ public class UserServiceImplTest {
     @Mock
     private Authentication authentication;
 
-    @Mock
+    @InjectMocks
     private UserServiceImpl userService;
     LoginRequestDto loginRequestDto;
 
@@ -95,10 +92,14 @@ public class UserServiceImplTest {
         user.setPassword("12345");
         user.setEmail("yomeekoko25@gmail.com");
 
-        Mockito.when(userRepository.findByEmail(any())).thenReturn(Optional.of(user));
+        Mockito.when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         String token="jagonsujbvhjthvbghvdcfgjcgnfbfjargonsv";
+        String subject = "Reset password";
+        String body = "Hello";
+        MailDto mailDto = new MailDto(user.getEmail(), subject, body);
+
         Mockito.when(jwtUtils.generatePasswordResetToken(any())).thenReturn(token);
-        Mockito.when(emailSenderService.sendEmail(any())).thenReturn(ResponseEntity.ok("Message sent successfully"));
+        Mockito.when(emailSenderService.sendEmail(mailDto)).thenReturn(ResponseEntity.ok("Message sent successfully"));
         ForgetPasswordRequest request =new ForgetPasswordRequest("yomeekoko25@gmail.com");
 //        assertEquals("Check your email for password reset instructions", userService.forgotPasswordRequest(request));
         org.assertj.core.api.Assertions.assertThat(userService.forgotPasswordRequest(request)).isEqualTo("Check your email for password reset instructions");

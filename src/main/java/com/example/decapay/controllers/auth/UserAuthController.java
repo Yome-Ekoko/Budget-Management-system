@@ -28,10 +28,7 @@ public class UserAuthController {
         return new ResponseEntity<>(returnValue, HttpStatus.CREATED);
     }
 
-    @GetMapping("/verify-token/{token}")
-    public ResponseEntity<?> verifyToken( @PathVariable("token") String token) {
-        return new ResponseEntity<>(userService.verifyToken(token),HttpStatus.FOUND);
-    }
+
 
 
     @PostMapping("/signin")
@@ -39,13 +36,5 @@ public class UserAuthController {
         return userService.userLogin(loginRequestDto);
     }
 
-    @PostMapping("/forgot-password")
-    public ResponseEntity<String> forgotPassword(@RequestBody @Valid ForgetPasswordRequest request){
-        return new ResponseEntity<>(userService.forgotPasswordRequest(request), HttpStatus.OK);
-    }
 
-    @PostMapping("/reset-password")
-    public String resetPassword(@RequestBody @Valid ResetPasswordRequest request){
-        return userService.resetPassword(request);
-    }
 }

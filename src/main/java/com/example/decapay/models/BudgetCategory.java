@@ -17,6 +17,7 @@ import javax.persistence.*;
 @Table(name = "category_tb")
 public class BudgetCategory extends BaseEntity{
     private String name;
+    private Boolean isDeleted;
 
     @ManyToOne()
     @JoinColumn(name = "user_tb_id")

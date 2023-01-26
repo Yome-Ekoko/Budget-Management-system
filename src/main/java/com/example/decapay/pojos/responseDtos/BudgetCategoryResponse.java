@@ -14,11 +14,14 @@ public class BudgetCategoryResponse {
     private  Long id;
     private  String name;
 
+    private Boolean isDeleted;
+
     public static BudgetCategoryResponse mapFrom(BudgetCategory budgetCategory){
 
         BudgetCategoryResponse budgetCategoryResponse = new BudgetCategoryResponse();
         budgetCategoryResponse.setId(budgetCategory.getId());
         budgetCategoryResponse.setName(budgetCategory.getName());
+        budgetCategoryResponse.setIsDeleted(budgetCategory.getIsDeleted());
 
         return budgetCategoryResponse;
     }

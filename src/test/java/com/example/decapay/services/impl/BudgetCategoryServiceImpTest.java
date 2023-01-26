@@ -53,22 +53,6 @@ class BudgetCategoryServiceImpTest {
     @Mock
     private UserService userService;
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper mapper;
-
-
-    @Mock
-    private CustomUserDetailService customUserDetailService;
-
-    @Mock
-    private JwtAuthFilter jwtAuthFilter;
-
-    @Mock
-    private TokenRepository tokenRepository;
-
     private BudgetCategoryRequest budgetCategoryRequest;
 
     private BudgetCategory budgetCategory;
@@ -136,6 +120,7 @@ class BudgetCategoryServiceImpTest {
         budgetCategory.setId(2L);
         budgetCategory.setUser(user);
         budgetCategory.setName("Provision");
+        budgetCategory.setIsDeleted(true);
         budgetCategory.setCreatedAt(LocalDateTime.now());
         budgetCategory.setUpdatedAt(LocalDateTime.now());
 
@@ -158,6 +143,7 @@ class BudgetCategoryServiceImpTest {
         budgetCategory.setId(2L);
         budgetCategory.setUser(user);
         budgetCategory.setName("Provision");
+        budgetCategory.setIsDeleted(true);
         budgetCategory.setCreatedAt(LocalDateTime.now());
         budgetCategory.setUpdatedAt(LocalDateTime.now());
 
@@ -187,7 +173,7 @@ class BudgetCategoryServiceImpTest {
         when(budgetCategoryRepository.findById(1L)).thenReturn(Optional.of(budgetCategory));
 
         budgetCategoryService.deleteBudgetCategory(budgetCategory.getId());
-        verify(budgetCategoryRepository).delete(budgetCategory);
-//        verify(budgetCategoryRepository, times(1)).save(any(BudgetCategory.class));
+//        verify(budgetCategoryRepository).delete(budgetCategory);
+        verify(budgetCategoryRepository, times(1)).save(any(BudgetCategory.class));
     }
 }

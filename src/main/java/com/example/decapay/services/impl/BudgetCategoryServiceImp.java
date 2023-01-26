@@ -8,6 +8,7 @@ import com.example.decapay.models.User;
 import com.example.decapay.pojos.requestDtos.BudgetCategoryRequest;
 import com.example.decapay.pojos.responseDtos.BudgetCategoryResponse;
 import com.example.decapay.repositories.BudgetCategoryRepository;
+import com.example.decapay.repositories.BudgetRepository;
 import com.example.decapay.repositories.UserRepository;
 import com.example.decapay.services.BudgetCategoryService;
 import com.example.decapay.services.UserService;
@@ -20,6 +21,8 @@ import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -39,19 +42,23 @@ public class BudgetCategoryServiceImp implements BudgetCategoryService {
         User user= userRepository.findByEmail(email)
                 .orElseThrow(()-> new EntityNotFoundException("User not found"));
 
-        BudgetCategory budgetCategory= new BudgetCategory();
+        Optional<BudgetCategory> categoryOptional = budgetCategoryRepository
+                .findByName(budgetCategoryRequest.getName());
 
-        budgetCategory.setName(budgetCategoryRequest.getName());
-        budgetCategory.setUser(user);
+        BudgetCategory budgetCategory = new BudgetCategory();
 
+        if (categoryOptional.isEmpty()) {
+            budgetCategory.setName(budgetCategoryRequest.getName());
+            budgetCategory.setUser(user);
+        } else {
+            budgetCategory = categoryOptional.get();
+        }
+
+        budgetCategory.setIsDeleted(false);
         budgetCategory=budgetCategoryRepository.save(budgetCategory);
 
-       BudgetCategoryResponse budgetCategoryResponse= BudgetCategoryResponse.mapFrom(budgetCategory);
 
-       return budgetCategoryResponse;
-
-
-
+        return BudgetCategoryResponse.mapFrom(budgetCategory);
     }
 
 
@@ -95,6 +102,12 @@ public class BudgetCategoryServiceImp implements BudgetCategoryService {
     public List<BudgetCategoryResponse> getBudgetCategories() {
         User user = userService.getUserByEmail(userUtil.getAuthenticatedUserEmail());
         List<BudgetCategory> budgetCategoryList = budgetCategoryRepository.findByUser(user);
+
+        budgetCategoryList = budgetCategoryList
+                .stream()
+                .filter(cat -> !cat.getIsDeleted())
+                .collect(Collectors.toList());
+
         return BudgetCategoryResponse.mapFromList(budgetCategoryList);
     }
 
@@ -110,6 +123,8 @@ public class BudgetCategoryServiceImp implements BudgetCategoryService {
         if (!(budgetCategory.getUser().getId().equals(user.getId()))){
             throw new AuthenticationException("Action Not Authorized");
         }
-        budgetCategoryRepository.delete(budgetCategory);
+
+        budgetCategory.setIsDeleted(true);
+        budgetCategoryRepository.save(budgetCategory);
     }
 }

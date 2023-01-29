@@ -27,12 +27,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityNotFoundException;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static com.example.decapay.pojos.requestDtos.BudgetDto.mapBudgetDtoToBudget;
 
@@ -65,10 +67,16 @@ public class BudgetServiceImpl implements BudgetService {
     private List<BudgetViewModel> getBudgetRest(List<Budget> budgets) {
         List<BudgetViewModel> budgetViewModelList = new ArrayList<>();
 
+        String email = userUtil.getAuthenticatedUserEmail();
+        User user = userService.getUserByEmail(email);
+        List<Long> budgetList = budgetRepository.findAllByUser(user);
+        int budgetCount = budgetList.size();
+
         budgets.forEach(budget -> {
             BudgetViewModel budgetViewModel = new BudgetViewModel();
             budgetViewModel.setBudgetId(budget.getId());
             budgetViewModel.setAmount(budget.getAmount());
+            budgetViewModel.setTotalBudgets(budgetCount);
 
             List<LineItem> lineItems = lineItemRepository.findAllByBudget(budget);
             BigDecimal totalAmountSpent = lineItems.stream()
@@ -117,16 +125,28 @@ public class BudgetServiceImpl implements BudgetService {
     }
 
     @Override
-    public CreateBudgetResponse fetchBudgetById(Long budgetId) {
-        String email = userUtil.getAuthenticatedUserEmail();
+    public BudgetViewModel fetchBudgetById(Long budgetId) {
+        BudgetViewModel budgetViewModel = new BudgetViewModel();
 
-        User activeUser = userService.getUserByEmail(email);
+      Optional<Budget> optionalBudget =budgetRepository.findBudgetById(budgetId);
+      if(optionalBudget.isPresent()){
+          Budget budget = optionalBudget.get();
 
-        Budget budget = budgetRepository.findBudgetByIdAndUserId(budgetId, activeUser.getId())
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        HttpStatus.BAD_REQUEST, "Budget with id: " + budgetId + " Not Found"
-                ));
-        return CreateBudgetResponse.convertBudgetToCreateBudgetResponse(budget);
+          budgetViewModel.setBudgetId(budget.getId());
+          budgetViewModel.setAmount(budget.getAmount());
+
+          List<LineItem> lineItems = lineItemRepository.findAllByBudget(budget);
+          BigDecimal totalAmountSpent = lineItems.stream()
+                  .map(LineItem::getTotalAmountSpent)
+                  .reduce(BigDecimal.ZERO, BigDecimal::add);
+          budgetViewModel.setTotalAmountSpent(totalAmountSpent);
+
+          BigDecimal percentage = totalAmountSpent.divide(budget.getAmount(), new MathContext(2));
+          budgetViewModel.setPercentage(percentage);
+          budgetViewModel.setLineItemRests(getLineItemRest(lineItems));
+
+      }
+        return budgetViewModel;
     }
 
     @Override

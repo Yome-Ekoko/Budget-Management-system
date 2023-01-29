@@ -166,12 +166,11 @@ class BudgetServiceImplTest {
         budgetRepository.save(budget);
         given(userUtil.getAuthenticatedUserEmail()).willReturn("mybudget@email.com");
         given(userService.getUserByEmail("mybudget@email.com")).willReturn(activeUser);
-        given(budgetRepository.findBudgetByIdAndUserId(2L, 2L)).willReturn(Optional.of(budget));
-        CreateBudgetResponse returnedBudget = budgetService.fetchBudgetById(2L);
-        assertEquals(budget.getDescription(), returnedBudget.getDescription());
-        assertEquals(budget.getTitle(), returnedBudget.getTitle());
+        given(budgetRepository.findBudgetById(2L)).willReturn(Optional.of(budget));
+        BudgetViewModel returnedBudget = budgetService.fetchBudgetById(2L);
         assertEquals(budget.getAmount(), returnedBudget.getAmount());
-        assertEquals(String.valueOf(budget.getBudgetPeriod()), returnedBudget.getPeriod());
+        assertEquals(budget.getId(), returnedBudget.getBudgetId());
+        assertEquals(budget.getAmount(), returnedBudget.getAmount());
     }
 
     @Test

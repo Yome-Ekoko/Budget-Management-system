@@ -39,7 +39,7 @@ public class BudgetController {
     }
 
     @GetMapping("/{budgetId}")
-    public ResponseEntity<CreateBudgetResponse> fetchBudget(@PathVariable(name = "budgetId")Long budgetId){
+    public ResponseEntity<BudgetViewModel> fetchBudget(@PathVariable(name = "budgetId")Long budgetId){
         return ResponseEntity.ok(budgetService.fetchBudgetById(budgetId));
     }
 

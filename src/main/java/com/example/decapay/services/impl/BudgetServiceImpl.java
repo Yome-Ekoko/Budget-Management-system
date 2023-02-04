@@ -84,7 +84,8 @@ public class BudgetServiceImpl implements BudgetService {
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
             budgetViewModel.setTotalAmountSpent(totalAmountSpent);
 
-            BigDecimal percentage = totalAmountSpent.divide(budget.getAmount(), new MathContext(2));
+            BigDecimal percentage = totalAmountSpent.divide(budget.getAmount(), new MathContext(2))
+                    .multiply(new BigDecimal(100));
             budgetViewModel.setPercentage(percentage);
             budgetViewModel.setLineItemRests(getLineItemRest(lineItems));
             budgetViewModelList.add(budgetViewModel);
@@ -100,7 +101,8 @@ public class BudgetServiceImpl implements BudgetService {
             LineItemRest lineItemRest = new LineItemRest();
 
             BigDecimal totalAmountSoFar = lineItem.getTotalAmountSpent();
-            BigDecimal percentageSoFar = totalAmountSoFar.divide(lineItem.getProjectedAmount(), new MathContext(2));
+            BigDecimal percentageSoFar = totalAmountSoFar.divide(lineItem.getProjectedAmount(), new MathContext(2))
+                    .multiply(new BigDecimal(100));
             lineItemRest.setLineItemId(lineItem.getId());
             lineItemRest.setCategory(lineItem.getBudgetCategory().getName());
             lineItemRest.setProjectedAmount(lineItem.getProjectedAmount());
@@ -134,6 +136,11 @@ public class BudgetServiceImpl implements BudgetService {
 
           budgetViewModel.setBudgetId(budget.getId());
           budgetViewModel.setAmount(budget.getAmount());
+          budgetViewModel.setBudgetPeriod(budget.getBudgetPeriod());
+          budgetViewModel.setTitle(budget.getTitle());
+          budgetViewModel.setDescription(budget.getDescription());
+          budgetViewModel.setStartDate(budget.getStartDate());
+          budgetViewModel.setEndDate(budget.getEndDate());
 
           List<LineItem> lineItems = lineItemRepository.findAllByBudget(budget);
           BigDecimal totalAmountSpent = lineItems.stream()
@@ -141,7 +148,8 @@ public class BudgetServiceImpl implements BudgetService {
                   .reduce(BigDecimal.ZERO, BigDecimal::add);
           budgetViewModel.setTotalAmountSpent(totalAmountSpent);
 
-          BigDecimal percentage = totalAmountSpent.divide(budget.getAmount(), new MathContext(2));
+          BigDecimal percentage = totalAmountSpent.divide(budget.getAmount(), new MathContext(2))
+                  .multiply(new BigDecimal(100));
           budgetViewModel.setPercentage(percentage);
           budgetViewModel.setLineItemRests(getLineItemRest(lineItems));
 

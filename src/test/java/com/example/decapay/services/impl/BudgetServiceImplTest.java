@@ -90,8 +90,8 @@ class BudgetServiceImplTest {
 
         assertNotNull(budgetViewModel);
         assertEquals(1, budgetViewModel.size());
-        assertEquals(new BigDecimal("0.6"), budgetViewModel.get(0).getPercentage());
-        assertEquals(new BigDecimal("0.94"), budgetViewModel.get(0).getLineItemRests().get(0).getPercentageSpentSoFar());
+        assertEquals(new BigDecimal("60.0"), budgetViewModel.get(0).getPercentage());
+        assertEquals(new BigDecimal("94.0"), budgetViewModel.get(0).getLineItemRests().get(0).getPercentageSpentSoFar());
         verify(budgetRepository, times(1)).findAllByUser(any(User.class), any(Pageable.class));
     }
 

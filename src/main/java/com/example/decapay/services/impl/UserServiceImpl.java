@@ -140,7 +140,7 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public String forgotPasswordRequest(ForgetPasswordRequest forgotPasswordRequest) {
+    public ResponseEntity<String> forgotPasswordRequest(ForgetPasswordRequest forgotPasswordRequest) {
         String email = forgotPasswordRequest.getEmail();
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
@@ -157,18 +157,22 @@ public class UserServiceImpl implements UserService {
 
         String link = String.format("%s%s", forgotPasswordUrl, generatedToken + " expires in 15 minutes.");
         emailSenderService.sendPasswordResetEmail( forgotPasswordRequest.getEmail(), "forgot Password token", link);
-        return "Check your email for password reset instructions";
+        return ResponseEntity.ok("Check your email for password reset instructions");
     }
 
     @Override
-    public String resetPassword(ResetPasswordRequest request) {
+    public ResponseEntity<String> resetPassword(ResetPasswordRequest request) {
         if (!request.getNewPassword().equals(request.getConfirmPassword()))
             throw new InputMismatchException("Passwords do not match");
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
-        return "Password reset successful";
+
+        return ResponseEntity.ok("Password reset successful");
+
     }
 
     @Override

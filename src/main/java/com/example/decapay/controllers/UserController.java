@@ -1,14 +1,14 @@
 package com.example.decapay.controllers;
 
+import com.example.decapay.pojos.requestDtos.ForgetPasswordRequest;
+import com.example.decapay.pojos.requestDtos.ResetPasswordRequest;
 import com.example.decapay.pojos.requestDtos.UserUpdateRequest;
 import com.example.decapay.services.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
@@ -22,5 +22,18 @@ public class UserController {
     public ResponseEntity<String> editUser(@Valid @RequestBody UserUpdateRequest userUpdateRequest){
 
         return userService.editUser(userUpdateRequest);
+    }
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@RequestBody @Valid ForgetPasswordRequest request){
+        return new ResponseEntity<>(userService.forgotPasswordRequest(request), HttpStatus.OK);
+    }
+
+    @PostMapping("/reset-password")
+    public String resetPassword(@RequestBody @Valid ResetPasswordRequest request){
+        return userService.resetPassword(request);
+    }
+    @GetMapping("/verify-token/{token}")
+    public ResponseEntity<?> verifyToken( @PathVariable("token") String token) {
+        return new ResponseEntity<>(userService.verifyToken(token),HttpStatus.FOUND);
     }
 }

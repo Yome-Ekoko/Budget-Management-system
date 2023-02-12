@@ -28,10 +28,7 @@ public class UserAuthController {
         return new ResponseEntity<>(returnValue, HttpStatus.CREATED);
     }
 
-    @GetMapping("/verify-token/{token}")
-    public ResponseEntity<?> verifyToken( @PathVariable("token") String token) {
-        return new ResponseEntity<>(userService.verifyToken(token),HttpStatus.FOUND);
-    }
+
 
 
     @PostMapping("/signin")
